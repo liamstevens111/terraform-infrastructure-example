@@ -1,1 +1,1 @@
-# terraform-infrastructure-example
+# Terraform Infrastructure Example
