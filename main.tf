@@ -19,7 +19,9 @@ provider "aws" {
   region = var.region
 }
 
-module "vpc" {
-    source = "./modules/networking"
-    vpc_name = "Main VPC"
+module "network" {
+  source   = "./modules/network"
+  vpc_name = "${var.env_name}-VPC"
+
+  base_cidr_block = "10.0.0.0/16"
 }
