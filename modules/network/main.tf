@@ -1,5 +1,7 @@
 resource "aws_vpc" "main" {
-  cidr_block = var.base_cidr_block
+  cidr_block           = var.base_cidr_block
+  enable_dns_hostnames = true
+  enable_dns_support   = true
 
   tags = {
     Name = var.vpc_name
@@ -54,49 +56,122 @@ resource "aws_subnet" "private_2" {
   }
 }
 
-resource "aws_security_group" "alb_ecs_security_group" {
-  name        = "alb_ecs_security_group"
-  description = "Security group for ECS ALB"
-  vpc_id      = aws_vpc.main.id
+resource "aws_route_table" "public" {
+  vpc_id = aws_vpc.main.id
 
   tags = {
-    Name = "alb_ecs_security_group"
+    Name = "${var.env_name}-public-routing-table"
   }
 }
 
-resource "aws_security_group_rule" "ecs_allow_incoming_http" {
+resource "aws_route" "public" {
+  route_table_id         = aws_route_table.public.id
+  destination_cidr_block = "0.0.0.0/0"
+  gateway_id             = aws_internet_gateway.main.id
+}
+
+resource "aws_main_route_table_association" "main" {
+  vpc_id         = aws_vpc.main.id
+  route_table_id = aws_route_table.public.id
+}
+
+resource "aws_route_table_association" "public_1" {
+  route_table_id = aws_route_table.public.id
+  subnet_id      = aws_subnet.public_1.id
+}
+
+resource "aws_route_table_association" "public_2" {
+  route_table_id = aws_route_table.public.id
+  subnet_id      = aws_subnet.public_2.id
+}
+
+resource "aws_security_group" "alb_main" {
+  name        = "alb_security_group"
+  description = "Security group for ALB"
+  vpc_id      = aws_vpc.main.id
+
+  tags = {
+    Name = "alb_security_group"
+  }
+}
+
+resource "aws_security_group_rule" "allow_incoming_http" {
   type              = "ingress"
   from_port         = 0
   to_port           = 80
   protocol          = "tcp"
   cidr_blocks       = ["0.0.0.0/0"]
   ipv6_cidr_blocks  = ["::/0"]
-  security_group_id = aws_security_group.alb_ecs_security_group.id
+  security_group_id = aws_security_group.alb_main.id
 }
 
-resource "aws_security_group_rule" "ecs_allow_incoming_https" {
+resource "aws_security_group_rule" "allow_incoming_https" {
   type              = "ingress"
   from_port         = 0
   to_port           = 443
   protocol          = "tcp"
   cidr_blocks       = ["0.0.0.0/0"]
   ipv6_cidr_blocks  = ["::/0"]
-  security_group_id = aws_security_group.alb_ecs_security_group.id
+  security_group_id = aws_security_group.alb_main.id
 }
 
-resource "aws_security_group_rule" "outgoing_to_ecs" {
+resource "aws_security_group_rule" "outgoing_to_anywhere" {
   type              = "egress"
   from_port         = 0
   to_port           = 0
   protocol          = "-1"
   cidr_blocks       = ["0.0.0.0/0"]
-  security_group_id = aws_security_group.alb_ecs_security_group.id
+  security_group_id = aws_security_group.alb_main.id
 }
 
 resource "aws_lb" "alb_ecs_main" {
   name               = "alb-ecs-main"
   internal           = false
   load_balancer_type = "application"
-  security_groups    = [aws_security_group.alb_ecs_security_group.id]
+  security_groups    = [aws_security_group.alb_main.id]
   subnets            = [aws_subnet.public_1.id, aws_subnet.public_2.id]
+}
+
+resource "aws_security_group" "ecs_main" {
+  name        = "ecs_security_group"
+  description = "Security group for ECS"
+  vpc_id      = aws_vpc.main.id
+
+  ingress {
+    from_port       = 0
+    to_port         = 0
+    protocol        = "-1"
+    security_groups = [aws_security_group.alb_main.id]
+  }
+
+  egress {
+    from_port        = 0
+    to_port          = 0
+    protocol         = "-1"
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
+
+  tags = {
+    Name = "${var.env_name}-ecs-sg"
+  }
+}
+
+resource "aws_alb_target_group" "main" {
+  name        = "alb-ecs-target-group"
+  port        = 80
+  protocol    = "HTTP"
+  target_type = "ip"
+  vpc_id      = aws_vpc.main.id
+}
+
+resource "aws_lb_listener" "app_http" {
+  load_balancer_arn = aws_lb.alb_ecs_main.arn
+  port              = "80"
+  protocol          = "HTTP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_alb_target_group.main.arn
+  }
 }
