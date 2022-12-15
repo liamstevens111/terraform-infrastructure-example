@@ -1,3 +1,10 @@
+resource "aws_ecr_repository" "main" {
+  name = "${var.app_name}-${var.app_name}-ecr"
+  tags = {
+    Name = "${var.app_name}-ecr"
+  }
+}
+
 resource "aws_ecs_cluster" "main" {
   name = "${var.namespace}-cluster"
 
@@ -45,12 +52,15 @@ resource "aws_ecs_service" "main" {
   network_configuration {
     subnets          = var.subnets
     security_groups  = var.security_groups
-    assign_public_ip = true
+    assign_public_ip = false
   }
 
   load_balancer {
     target_group_arn = var.alb_target_group_arn
-    container_name   = "liam-hello-world"
+    container_name   = "${var.app_name}-${var.env_name}"
     container_port   = 80
   }
+
+  # depends_on role/alb?
+
 }
