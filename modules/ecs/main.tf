@@ -23,7 +23,7 @@ resource "aws_cloudwatch_log_group" "ecs-log-group" {
 
 resource "aws_ecs_service" "main" {
 
-  name    = var.service_name
+  name    = "${var.app_name}-${var.env_name}-ecs-service"
   cluster = aws_ecs_cluster.main.id
   # task_definition = 
   # iam_role = 
