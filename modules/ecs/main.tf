@@ -1,9 +1,10 @@
-resource "aws_ecr_repository" "main" {
-  name = "${var.app_name}-${var.app_name}-ecr"
-  tags = {
-    Name = "${var.app_name}-ecr"
-  }
-}
+# Use when host own container instance
+# resource "aws_ecr_repository" "main" {
+#   name = "${var.app_name}-${var.env_name}-ecr"
+#   tags = {
+#     Name = "${var.app_name}-ecr"
+#   }
+# }
 
 resource "aws_ecs_cluster" "main" {
   name = "${var.app_name}-${var.env_name}-cluster"
@@ -21,27 +22,46 @@ resource "aws_cloudwatch_log_group" "ecs-log-group" {
   }
 }
 
-resource "aws_ecs_service" "main" {
+resource "aws_ecs_task_definition" "aws-ecs-task-definition" {
+  family                   = "liam-hello-world"
+  requires_compatibilities = ["FARGATE"]
+  network_mode             = "awsvpc"
+  cpu                      = 512
+  memory                   = 1024
+  # Roles needed for when use ECR, Cloudwatch, RDS
+  # execution_role_arn = 
+  # task_role_arn = 
 
-  name    = "${var.app_name}-${var.env_name}-ecs-service"
-  cluster = aws_ecs_cluster.main.id
-  # task_definition = 
-  # iam_role = 
-  desired_count = var.task_count
-  launch_type   = "FARGATE"
+  container_definitions = jsonencode([{
+    name      = "liam-hello-world",
+    image     = "nginxdemos/hello",
+    essential = true,
+    portMappings = [{
+      protocol      = "tcp"
+      containerPort = 80
+      hostPort      = 80
+    }],
+    "cpu" : 256,
+    "memory" : 512
+  }])
+}
+
+resource "aws_ecs_service" "main" {
+  name            = "${var.app_name}-${var.env_name}-ecs-service"
+  cluster         = aws_ecs_cluster.main.id
+  task_definition = aws_ecs_task_definition.aws-ecs-task-definition.arn
+  desired_count   = var.task_count
+  launch_type     = "FARGATE"
 
   network_configuration {
     subnets          = var.subnets
     security_groups  = var.security_groups
-    assign_public_ip = false
+    assign_public_ip = true
   }
 
   load_balancer {
     target_group_arn = var.alb_target_group_arn
-    container_name   = "${var.app_name}-${var.env_name}"
+    container_name   = "liam-hello-world"
     container_port   = 80
   }
-
-  # depends_on role/alb?
-
 }
