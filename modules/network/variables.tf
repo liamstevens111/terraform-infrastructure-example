@@ -5,3 +5,9 @@ variable "vpc_name" {
 variable "base_cidr_block" {
   type = string
 }
+
+variable "env_name" {
+  type        = string
+  default     = "prod"
+  description = "Name to be used for the current environment, ie staging or production"
+}
