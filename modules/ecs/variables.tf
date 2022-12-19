@@ -17,3 +17,11 @@ variable "subnets" {
 variable "security_groups" {
   type = list(string)
 }
+
+variable "database_url" {
+  type = string
+}
+
+variable "secret_key_base" {
+  type = string
+}
