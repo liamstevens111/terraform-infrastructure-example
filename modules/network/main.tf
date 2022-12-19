@@ -157,6 +157,23 @@ resource "aws_security_group" "ecs_main" {
   }
 }
 
+resource "aws_security_group" "rds_main" {
+  name        = "rds_security_group"
+  description = "Security group for RDS"
+  vpc_id      = aws_vpc.main.id
+
+  ingress {
+    from_port       = 0
+    to_port         = 5432
+    protocol        = "tcp"
+    security_groups = [aws_security_group.ecs_main.id]
+  }
+
+  tags = {
+    Name = "${var.env_name}-rds-sg"
+  }
+}
+
 resource "aws_alb_target_group" "main" {
   name        = "alb-ecs-target-group"
   port        = 80
