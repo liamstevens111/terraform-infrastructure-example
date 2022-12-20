@@ -1,16 +1,16 @@
 resource "aws_ecs_cluster" "main" {
-  name = "${var.app_name}-${var.env_name}-cluster"
+  name = "${var.namespace}-cluster"
 
   tags = {
-    Name = "${var.app_name}-ecs"
+    Name = "${var.namespace}-ecs"
   }
 }
 
 resource "aws_cloudwatch_log_group" "ecs-log-group" {
-  name = "${var.app_name}-${var.env_name}-logs"
+  name = "${var.namespace}-logs"
 
   tags = {
-    Application = var.app_name
+    Application = var.namespace
   }
 }
 
@@ -36,7 +36,7 @@ resource "aws_ecs_task_definition" "aws-ecs-task-definition" {
 }
 
 resource "aws_ecs_service" "main" {
-  name            = "${var.app_name}-${var.env_name}-ecs-service"
+  name            = "${var.namespace}-ecs-service"
   cluster         = aws_ecs_cluster.main.id
   task_definition = aws_ecs_task_definition.aws-ecs-task-definition.arn
   desired_count   = var.task_count
