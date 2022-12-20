@@ -1,8 +1,4 @@
-variable "app_name" {
-  type = string
-}
-
-variable "env_name" {
+variable "namespace" {
   type = string
 }
 
