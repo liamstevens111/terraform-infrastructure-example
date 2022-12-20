@@ -1,12 +1,8 @@
-variable "app_name" {
+variable "namespace" {
   type = string
 }
 
 variable "alb_target_group_arn" {
-  type = string
-}
-
-variable "env_name" {
   type = string
 }
 
