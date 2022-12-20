@@ -6,11 +6,11 @@ output "alb_target_group_arn" {
   value = aws_alb_target_group.main.arn
 }
 
-output "public_subnet_group_ids" {
+output "public_subnet_ids" {
   value = [aws_subnet.public_1.id, aws_subnet.public_2.id]
 }
 
-output "private_subnet_group_ids" {
+output "private_subnet_ids" {
   value = [aws_subnet.private_1.id, aws_subnet.private_2.id]
 }
 
