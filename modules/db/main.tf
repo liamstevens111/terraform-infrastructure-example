@@ -1,7 +1,7 @@
 resource "aws_db_instance" "main" {
   identifier             = "liamdb"
   allocated_storage      = 5
-  db_name                = "db${var.namespace}"
+  db_name                = var.db_name
   engine                 = "postgres"
   engine_version         = "14.1"
   instance_class         = "db.t3.micro"

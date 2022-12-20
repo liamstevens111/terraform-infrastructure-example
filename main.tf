@@ -32,7 +32,8 @@ module "ecs" {
   namespace  = var.namespace
   task_count = 2
 
-  region = var.region
+  region   = var.region
+  tag_name = "staging"
 
   alb_target_group_arn = module.network.alb_target_group_arn
   #TODO: Replace with private subnet groups when implemented
@@ -45,6 +46,7 @@ module "ecs" {
 
 module "rds" {
   source                 = "./modules/db"
+  db_name                = "liamdbstaging"
   db_password            = var.db_password
   namespace              = var.namespace
   subnet_ids             = module.network.public_subnet_ids
