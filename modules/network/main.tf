@@ -4,7 +4,7 @@ resource "aws_vpc" "main" {
   enable_dns_support   = true
 
   tags = {
-    Name = "${var.env_name}-VPC"
+    Name = "${var.namespace}-VPC"
   }
 }
 
@@ -60,7 +60,7 @@ resource "aws_route_table" "public" {
   vpc_id = aws_vpc.main.id
 
   tags = {
-    Name = "${var.env_name}-public-routing-table"
+    Name = "${var.namespace}-public-routing-table"
   }
 }
 
@@ -115,10 +115,10 @@ resource "aws_security_group_rule" "allow_incoming_https" {
   security_group_id = aws_security_group.alb_main.id
 }
 
-resource "aws_security_group_rule" "outgoing_to_anywhere" {
+resource "aws_security_group_rule" "outgoing_to_ecs" {
   type              = "egress"
   from_port         = 0
-  to_port           = 0
+  to_port           = 4000
   protocol          = "-1"
   cidr_blocks       = ["0.0.0.0/0"]
   security_group_id = aws_security_group.alb_main.id
@@ -138,9 +138,9 @@ resource "aws_security_group" "ecs_main" {
   vpc_id      = aws_vpc.main.id
 
   ingress {
-    from_port       = 0
-    to_port         = 0
-    protocol        = "-1"
+    from_port       = 4000
+    to_port         = 4000
+    protocol        = "tcp"
     security_groups = [aws_security_group.alb_main.id]
   }
 
@@ -153,7 +153,7 @@ resource "aws_security_group" "ecs_main" {
   }
 
   tags = {
-    Name = "${var.env_name}-ecs-sg"
+    Name = "${var.namespace}-ecs-sg"
   }
 }
 

@@ -23,5 +23,5 @@ module "network" {
   source          = "./modules/network"
   base_cidr_block = "10.0.0.0/16"
 
-  env_name = var.env_name
+  namespace = var.namespace
 }
