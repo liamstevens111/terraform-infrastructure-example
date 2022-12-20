@@ -9,3 +9,15 @@ variable "namespace" {
   type        = string
   default     = "liam-example-staging"
 }
+
+variable "db_password" {
+  type = string
+}
+
+variable "database_url" {
+  type = string
+}
+
+variable "secret_key_base" {
+  type = string
+}
