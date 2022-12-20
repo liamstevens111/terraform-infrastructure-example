@@ -20,8 +20,8 @@ provider "aws" {
 }
 
 module "network" {
-  source   = "./modules/network"
-  vpc_name = "${var.env_name}-VPC"
-
+  source          = "./modules/network"
   base_cidr_block = "10.0.0.0/16"
+
+  env_name = var.env_name
 }

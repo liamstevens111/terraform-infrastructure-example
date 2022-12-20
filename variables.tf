@@ -8,3 +8,8 @@ variable "env_name" {
   default     = "prod"
   description = "Name to be used for the current environment, ie staging or production"
 }
+
+variable "app_name" {
+  type    = string
+  default = "liam-example"
+}

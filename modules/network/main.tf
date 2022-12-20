@@ -4,7 +4,7 @@ resource "aws_vpc" "main" {
   enable_dns_support   = true
 
   tags = {
-    Name = var.vpc_name
+    Name = "${var.env_name}-VPC"
   }
 }
 
@@ -52,7 +52,7 @@ resource "aws_subnet" "private_2" {
   availability_zone = "us-east-1b"
 
   tags = {
-    Name = "Private Subnet 1"
+    Name = "Private Subnet 2"
   }
 }
 
@@ -138,8 +138,8 @@ resource "aws_security_group" "ecs_main" {
   vpc_id      = aws_vpc.main.id
 
   ingress {
-    from_port       = 80
-    to_port         = 80
+    from_port       = 0
+    to_port         = 0
     protocol        = "-1"
     security_groups = [aws_security_group.alb_main.id]
   }
