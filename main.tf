@@ -33,29 +33,9 @@ module "ecs" {
   task_count = 2
 
   alb_target_group_arn = module.network.alb_target_group_arn
-  subnets              = module.network.private_subnet_ids
-  security_groups      = [module.network.alb_security_group_id, module.network.ecs_security_group_id]
-}
-
-module "ecs" {
-  source = "./modules/ecs"
-
-  alb_target_group_arn = module.network.alb_target_group_arn
-  subnets              = module.network.private_subnet_group_ids
-  security_groups      = [module.network.alb_security_group_id, module.network.ecs_security_group_id]
-}
-
-module "ecs" {
-  source = "./modules/ecs"
-
-  app_name   = var.app_name
-  env_name   = var.env_name
-  task_count = 2
-
-  alb_target_group_arn = module.network.alb_target_group_arn
   #TODO: Replace with private subnet groups when implemented
-  subnets              = module.network.public_subnet_group_ids
-  security_groups      = [module.network.alb_security_group_id, module.network.ecs_security_group_id]
+  subnets         = module.network.public_subnet_group_ids
+  security_groups = [module.network.alb_security_group_id, module.network.ecs_security_group_id]
 
   database_url    = var.database_url
   secret_key_base = var.secret_key_base
