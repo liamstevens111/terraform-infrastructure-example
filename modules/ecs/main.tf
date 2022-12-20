@@ -1,8 +1,5 @@
 resource "aws_ecr_repository" "main" {
-  name = "${var.app_name}-${var.app_name}-ecr"
-  tags = {
-    Name = "${var.app_name}-ecr"
-  }
+  name = "${var.app_name}-ecr"
 }
 
 data "aws_iam_policy_document" "ecs_task_execution_policy" {
@@ -13,12 +10,9 @@ data "aws_iam_policy_document" "ecs_task_execution_policy" {
       "ecr:BatchCheckLayerAvailability",
       "ecr:GetDownloadUrlForLayer",
       "ecr:BatchGetImage",
-      "logs:GetLogEvents",
       "logs:CreateLogStream",
-      "logs:DescribeLogStreams",
-      "logs:PutRetentionPolicy",
-      "logs:CreateLogGroup",
-      "logs:PutLogEvents"
+      "logs:PutLogEvents",
+      "logs:CreateLogGroup"
     ]
     resources = ["*"]
   }
@@ -73,16 +67,18 @@ resource "aws_cloudwatch_log_group" "ecs-log-group" {
 }
 
 resource "aws_ecs_task_definition" "aws-ecs-task-definition" {
-  family                   = "liam-hello-world"
+  family                   = "liam-example-staging-task-definition"
   requires_compatibilities = ["FARGATE"]
   network_mode             = "awsvpc"
   cpu                      = 512
   memory                   = 1024
 
+  execution_role_arn = aws_iam_role.ecs_task_execution_role.arn
+  # task_role_arn = 
+
   container_definitions = jsonencode([{
-    name = "liam-example-prod-ecr",
-    # image     = "${aws_ecr_repository.main.repository_url}:latest",
-    image     = "301618631622.dkr.ecr.us-east-1.amazonaws.com/liam-example-ecr:latest",
+    name      = "liam-example-staging",
+    image     = "${aws_ecr_repository.main.repository_url}:${var.env_name}",
     essential = true,
     logConfiguration = {
       logDriver = "awslogs",
@@ -130,15 +126,12 @@ resource "aws_ecs_service" "main" {
   network_configuration {
     subnets          = var.subnets
     security_groups  = var.security_groups
-    assign_public_ip = false
+    assign_public_ip = true
   }
 
   load_balancer {
     target_group_arn = var.alb_target_group_arn
-    container_name   = "liam-example-prod-ecr"
+    container_name   = "liam-example-staging"
     container_port   = 4000
   }
-
-  # depends_on role/alb?
-
 }
