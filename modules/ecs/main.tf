@@ -1,11 +1,3 @@
-# Use when host own container instance
-# resource "aws_ecr_repository" "main" {
-#   name = "${var.app_name}-${var.env_name}-ecr"
-#   tags = {
-#     Name = "${var.app_name}-ecr"
-#   }
-# }
-
 resource "aws_ecs_cluster" "main" {
   name = "${var.app_name}-${var.env_name}-cluster"
 
@@ -28,9 +20,6 @@ resource "aws_ecs_task_definition" "aws-ecs-task-definition" {
   network_mode             = "awsvpc"
   cpu                      = 512
   memory                   = 1024
-  # Roles needed for when use ECR, Cloudwatch, RDS
-  # execution_role_arn = 
-  # task_role_arn = 
 
   container_definitions = jsonencode([{
     name      = "liam-hello-world",
