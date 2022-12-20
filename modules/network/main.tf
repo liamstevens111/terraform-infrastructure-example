@@ -119,7 +119,7 @@ resource "aws_security_group_rule" "outgoing_to_ecs" {
   type              = "egress"
   from_port         = 0
   to_port           = 4000
-  protocol          = "-1"
+  protocol          = "tcp"
   cidr_blocks       = ["0.0.0.0/0"]
   security_group_id = aws_security_group.alb_main.id
 }
