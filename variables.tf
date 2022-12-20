@@ -1,8 +1,7 @@
 variable "region" {
   description = "AWS region"
   type        = string
-  default     = "staging"
-  description = "Name to be used for the current environment, ie staging or production"
+  default     = "us-east-1"
 }
 
 variable "namespace" {

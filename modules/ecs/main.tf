@@ -1,5 +1,5 @@
 resource "aws_ecr_repository" "main" {
-  name = "${var.app_name}-ecr"
+  name = "liam-example-ecr"
 }
 
 data "aws_iam_policy_document" "ecs_task_execution_policy" {
@@ -78,13 +78,13 @@ resource "aws_ecs_task_definition" "aws-ecs-task-definition" {
 
   container_definitions = jsonencode([{
     name      = "liam-example-staging",
-    image     = "${aws_ecr_repository.main.repository_url}:${var.env_name}",
+    image     = "${aws_ecr_repository.main.repository_url}:staging",
     essential = true,
     logConfiguration = {
       logDriver = "awslogs",
       options = {
         awslogs-group         = aws_cloudwatch_log_group.ecs-log-group.name
-        awslogs-region        = "us-east-1"
+        awslogs-region        = var.region
         awslogs-stream-prefix = "ecs-liam"
         awslogs-create-group  = "true"
       }

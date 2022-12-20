@@ -25,3 +25,8 @@ variable "database_url" {
 variable "secret_key_base" {
   type = string
 }
+
+variable "region" {
+  description = "AWS region"
+  type        = string
+}

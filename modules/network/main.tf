@@ -170,7 +170,7 @@ resource "aws_security_group" "rds_main" {
   }
 
   tags = {
-    Name = "${var.env_name}-rds-sg"
+    Name = "${var.namespace}-rds-sg"
   }
 }
 
