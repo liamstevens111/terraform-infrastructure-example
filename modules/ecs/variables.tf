@@ -30,3 +30,7 @@ variable "region" {
   description = "AWS region"
   type        = string
 }
+
+variable "tag_name" {
+  type = string
+}

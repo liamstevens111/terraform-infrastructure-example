@@ -77,8 +77,8 @@ resource "aws_ecs_task_definition" "aws-ecs-task-definition" {
   # task_role_arn = 
 
   container_definitions = jsonencode([{
-    name      = "liam-example-staging",
-    image     = "${aws_ecr_repository.main.repository_url}:staging",
+    name      = var.namespace,
+    image     = "${aws_ecr_repository.main.repository_url}:${var.tag_name}",
     essential = true,
     logConfiguration = {
       logDriver = "awslogs",
@@ -131,7 +131,7 @@ resource "aws_ecs_service" "main" {
 
   load_balancer {
     target_group_arn = var.alb_target_group_arn
-    container_name   = "liam-example-staging"
+    container_name   = var.namespace
     container_port   = 4000
   }
 }
