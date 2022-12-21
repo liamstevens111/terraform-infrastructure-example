@@ -34,3 +34,7 @@ variable "region" {
 variable "tag_name" {
   type = string
 }
+
+variable "s3_bucket_name" {
+  type = string
+}
