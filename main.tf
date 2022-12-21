@@ -60,3 +60,13 @@ module "s3" {
   namespace   = var.namespace
   bucket_name = "main"
 }
+
+module "elasticache" {
+  source = "./modules/elasticache"
+
+  namespace = var.namespace
+  #TODO: Replace with private subnet groups when implemented
+  subnet_ids         = module.network.public_subnet_ids
+  security_group_ids = [module.network.elasticache_security_group_id]
+}
+
