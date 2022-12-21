@@ -10,6 +10,11 @@ variable "namespace" {
   default     = "liam-example-staging"
 }
 
+variable "environment" {
+  type    = string
+  default = "staging"
+}
+
 variable "db_password" {
   type = string
 }
