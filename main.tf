@@ -40,6 +40,8 @@ module "ecs" {
   subnets         = module.network.public_subnet_ids
   security_groups = [module.network.alb_security_group_id, module.network.ecs_security_group_id]
 
+  s3_bucket_name = module.s3.bucket_name
+
   database_url    = var.database_url
   secret_key_base = var.secret_key_base
 }
@@ -51,4 +53,10 @@ module "rds" {
   namespace              = var.namespace
   subnet_ids             = module.network.public_subnet_ids
   vpc_security_group_ids = [module.network.rds_security_group_id]
+}
+
+module "s3" {
+  source      = "./modules/s3"
+  namespace   = var.namespace
+  bucket_name = "main"
 }

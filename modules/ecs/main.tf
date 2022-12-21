@@ -96,8 +96,12 @@ resource "aws_ecs_task_definition" "aws-ecs-task-definition" {
     }],
     # Sensitive vars such as database_url to be replaced by parameter store
     environment = [{
-      name  = "DATABASE_URL",
-      value = var.database_url
+      name  = "AWS_S3_BUCKET_NAME",
+      value = var.s3_bucket_name
+      },
+      {
+        name  = "DATABASE_URL",
+        value = var.database_url
       },
       {
         name  = "SECRET_KEY_BASE",
