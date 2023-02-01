@@ -49,6 +49,7 @@ module "rds" {
   db_name                = "liamdbstaging"
   db_password            = var.db_password
   namespace              = var.namespace
+  # TODO: Replace with private subnet groups when implemented
   subnet_ids             = module.network.public_subnet_ids
   vpc_security_group_ids = [module.network.rds_security_group_id]
 }
