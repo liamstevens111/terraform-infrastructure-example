@@ -25,3 +25,14 @@ module "network" {
 
   namespace = var.namespace
 }
+
+module "ecs" {
+  source = "./modules/ecs"
+
+  namespace  = var.namespace
+  task_count = 2
+
+  alb_target_group_arn = module.network.alb_target_group_arn
+  subnets              = module.network.private_subnet_ids
+  security_groups      = [module.network.alb_security_group_id, module.network.ecs_security_group_id]
+}
