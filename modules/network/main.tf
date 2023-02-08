@@ -174,6 +174,23 @@ resource "aws_security_group" "rds_main" {
   }
 }
 
+resource "aws_security_group" "elasticache_main" {
+  name        = "elasticache_security_group"
+  description = "Security group for Elasticache"
+  vpc_id      = aws_vpc.main.id
+
+  ingress {
+    from_port       = 6379
+    to_port         = 6379
+    protocol        = "tcp"
+    security_groups = [aws_security_group.ecs_main.id]
+  }
+
+  tags = {
+    Name = "${var.namespace}-elasticache-sg"
+  }
+}
+
 resource "aws_alb_target_group" "main" {
   name        = "alb-ecs-target-group"
   port        = 80
