@@ -116,19 +116,9 @@ resource "aws_ecs_task_definition" "aws-ecs-task-definition" {
           hostPort      = 4000
         }
       ],
-      # Sensitive vars such as database_url to be replaced by parameter store
-      environment = [
-        {
-          name  = "AWS_S3_BUCKET_NAME",
-          value = var.s3_bucket_name
-        },
-        {
-          name  = "DATABASE_URL",
-          value = var.database_url
-        },
-        {
-          name  = "SECRET_KEY_BASE",
-          value = var.secret_key_base
+      environment = [{
+        name  = "AWS_S3_BUCKET_NAME",
+        value = var.s3_bucket_name
         },
         {
           name  = "PHX_HOST",
@@ -137,33 +127,13 @@ resource "aws_ecs_task_definition" "aws-ecs-task-definition" {
         {
           name  = "HEALTH_PATH",
           value = "/_health"
-        }
-      ],
+      }],
+      secrets = [for secret in var.parameter_store_secrets :
+      tomap({ name = secret.name, valueFrom = secret.arn })],
       "cpu" : 256,
       "memory" : 512
     }
-    portMappings = [{
-      protocol      = "tcp"
-      containerPort = 4000
-      hostPort      = 4000
-    }],
-    environment = [{
-      name  = "AWS_S3_BUCKET_NAME",
-      value = var.s3_bucket_name
-      },
-      {
-        name  = "PHX_HOST",
-        value = "localhost"
-      },
-      {
-        name  = "HEALTH_PATH",
-        value = "/_health"
-    }],
-    secrets = [for secret in var.parameter_store_secrets :
-    tomap({ name = secret.name, valueFrom = secret.arn })],
-    "cpu" : 256,
-    "memory" : 512
-  }])
+  ])
 }
 
 resource "aws_ecs_service" "main" {
