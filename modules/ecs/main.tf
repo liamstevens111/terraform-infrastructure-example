@@ -95,18 +95,52 @@ resource "aws_ecs_task_definition" "aws-ecs-task-definition" {
   execution_role_arn = aws_iam_role.ecs_task_execution_role.arn
   # task_role_arn = 
 
-  container_definitions = jsonencode([{
-    name      = var.namespace,
-    image     = "${aws_ecr_repository.main.repository_url}:${var.tag_name}",
-    essential = true,
-    logConfiguration = {
-      logDriver = "awslogs",
-      options = {
-        awslogs-group         = aws_cloudwatch_log_group.ecs-log-group.name
-        awslogs-region        = var.region
-        awslogs-stream-prefix = "ecs-liam"
-        awslogs-create-group  = "true"
+  container_definitions = jsonencode([
+    {
+      name      = var.namespace,
+      image     = "${aws_ecr_repository.main.repository_url}:${var.tag_name}",
+      essential = true,
+      logConfiguration = {
+        logDriver = "awslogs",
+        options = {
+          awslogs-group         = aws_cloudwatch_log_group.ecs-log-group.name
+          awslogs-region        = var.region
+          awslogs-stream-prefix = "ecs-liam"
+          awslogs-create-group  = "true"
+        }
       }
+      portMappings = [
+        {
+          protocol      = "tcp"
+          containerPort = 4000
+          hostPort      = 4000
+        }
+      ],
+      # Sensitive vars such as database_url to be replaced by parameter store
+      environment = [
+        {
+          name  = "AWS_S3_BUCKET_NAME",
+          value = var.s3_bucket_name
+        },
+        {
+          name  = "DATABASE_URL",
+          value = var.database_url
+        },
+        {
+          name  = "SECRET_KEY_BASE",
+          value = var.secret_key_base
+        },
+        {
+          name  = "PHX_HOST",
+          value = "localhost"
+        },
+        {
+          name  = "HEALTH_PATH",
+          value = "/_health"
+        }
+      ],
+      "cpu" : 256,
+      "memory" : 512
     }
     portMappings = [{
       protocol      = "tcp"
