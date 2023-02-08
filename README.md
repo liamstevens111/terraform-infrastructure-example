@@ -1,3 +1,1 @@
-# Terraform Infrastructure Example
-
-The project that will be hosted inside the ECS Container is located here <https://github.com/liamstevens111/terraform-elixir-repo>
+## New repo with new structure moved here https://github.com/liamstevens111/terraform-aws-infrastructure
