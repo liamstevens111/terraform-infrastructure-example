@@ -12,7 +12,17 @@ data "aws_iam_policy_document" "ecs_task_execution_policy" {
       "ecr:BatchGetImage",
       "logs:CreateLogStream",
       "logs:PutLogEvents",
-      "logs:CreateLogGroup"
+      "logs:CreateLogGroup",
+    ]
+    resources = ["*"]
+  }
+}
+
+data "aws_iam_policy_document" "ecs_task_execution_policy_ssm" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "ssm:GetParameters"
     ]
     resources = ["*"]
   }
@@ -43,11 +53,20 @@ resource "aws_iam_role_policy_attachment" "ecs-task-execution-role-policy-attach
   policy_arn = aws_iam_policy.policydocument.arn
 }
 
+resource "aws_iam_role_policy_attachment" "ecs-task-execution-role-ssm-policy-attachment" {
+  role       = aws_iam_role.ecs_task_execution_role.name
+  policy_arn = aws_iam_policy.policydocument-ssm.arn
+}
+
 
 resource "aws_iam_policy" "policydocument" {
   name   = "tf-policydocument"
   policy = data.aws_iam_policy_document.ecs_task_execution_policy.json
+}
 
+resource "aws_iam_policy" "policydocument-ssm" {
+  name   = "tf-policydocument-ssm"
+  policy = data.aws_iam_policy_document.ecs_task_execution_policy_ssm.json
 }
 
 resource "aws_ecs_cluster" "main" {
@@ -123,8 +142,28 @@ resource "aws_ecs_task_definition" "aws-ecs-task-definition" {
       "cpu" : 256,
       "memory" : 512
     }
-    ]
-  )
+    portMappings = [{
+      protocol      = "tcp"
+      containerPort = 4000
+      hostPort      = 4000
+    }],
+    environment = [{
+      name  = "AWS_S3_BUCKET_NAME",
+      value = var.s3_bucket_name
+      },
+      {
+        name  = "PHX_HOST",
+        value = "localhost"
+      },
+      {
+        name  = "HEALTH_PATH",
+        value = "/_health"
+    }],
+    secrets = [for secret in var.parameter_store_secrets :
+    tomap({ name = secret.name, valueFrom = secret.arn })],
+    "cpu" : 256,
+    "memory" : 512
+  }])
 }
 
 resource "aws_ecs_service" "main" {
